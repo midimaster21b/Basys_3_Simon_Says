@@ -105,29 +105,37 @@ signal SevenSegmentCharacterSelect : STD_LOGIC_VECTOR (2 downto 0);  -- Selected
 
 begin
 
+-- SevenSegmentMuxCharacters <= "011000011110";
+
 -- Inputs
 DebounceClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 20)
-                               PORT MAP (InputClock, DebounceClock);
-BTN1: Debouncer PORT MAP (DebounceClock, ButtonOneInput, ButtonOneDebounce);
-BTN2: Debouncer PORT MAP (DebounceClock, ButtonTwoInput, ButtonTwoDebounce);
-BTN3: Debouncer PORT MAP (DebounceClock, ButtonThreeInput, ButtonThreeDebounce);
+                               PORT MAP (InputClock => InputClock, OutputClock => DebounceClock);
+BTN1: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonOneInput, btn_out => ButtonOneDebounce);
+BTN2: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonTwoInput, btn_out => ButtonTwoDebounce);
+BTN3: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonThreeInput, btn_out => ButtonThreeDebounce);
 
 -- Game Logic...
 LedClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 1)
-                             PORT MAP (InputClock, LedClock);
+                             PORT MAP (InputClock => InputClock, OutputClock => LedClock);
 
 GAME: SimonSaysGameLogic
   PORT MAP (
-    rst, ButtonOneDebounce, ButtonTwoDebounce, ButtonThreeDebounce, InputClock, LedClock, 
-    LedOne, LedTwo, LedThree,
-    SevenSegmentMuxCharacters
+    rst => rst_switch, BtnOne => ButtonOneDebounce, BtnTwo => ButtonTwoDebounce, BtnThree => ButtonThreeDebounce, GameClk => InputClock, LedClk => LedClock, 
+    LedOne => LedOne, LedTwo => LedTwo, LedThree => LedThree,
+    CharOut => SevenSegmentMuxCharacters
   );
 
-
 -- Seven Segment Displays
-U1: CLK_DIVIDER_250Hz PORT MAP (InputClock, SevenSegmentClock);
-U2: Counter_2Bit PORT MAP (SevenSegmentClock, SevenSegmentCounterOut);
-U3: SevenSegmentMux PORT MAP (SevenSegmentCounterOut, SevenSegmentMuxCharacters, SevenSegmentDisplaySelect, SevenSegmentCharacterSelect);
-U4: SevenSegmentDecoder PORT MAP (SevenSegmentCharacterSelect, SevenSegmentCharacter);
+-- U1: CLK_DIVIDER_250Hz PORT MAP (clk_in => InputClock, div_clk => SevenSegmentClock);
+U1: ClkDivider GENERIC MAP (OutputClkFreq => 250)
+                  PORT MAP (InputClock => InputClock, OutputClock => SevenSegmentClock);
+U2: Counter_2Bit PORT MAP (clk => SevenSegmentClock, count => SevenSegmentCounterOut);
+U3: SevenSegmentMux PORT MAP (
+  DisplayMuxIn => SevenSegmentCounterOut, 
+  CharMuxIn => SevenSegmentMuxCharacters, 
+  DisplayMuxOut => SevenSegmentDisplaySelect, 
+  CharMuxOut => SevenSegmentCharacterSelect
+);
+U4: SevenSegmentDecoder PORT MAP (Input_Char => SevenSegmentCharacterSelect, Output_Char => SevenSegmentCharacter);
 
 end Behavioral;

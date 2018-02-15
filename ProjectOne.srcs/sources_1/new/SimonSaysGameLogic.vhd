@@ -68,7 +68,7 @@ begin
       when reset =>
         if BtnOne = '1' then
           -- Reset sequence size and iterator
-          sequence_size <= 0;
+          sequence_size <= 1;
           next_state <= output_lights;
         else
           next_state <= reset;
@@ -77,7 +77,6 @@ begin
       when output_lights =>
         if output_lights_complete = '1' then
           next_state <= input_buttons;
-          -- output_lights_complete <= '0';
         else
           next_state <= output_lights;
         end if;
@@ -85,15 +84,15 @@ begin
       when input_buttons =>
         if input_buttons_complete = '1' then
           next_state <= display_status;
-          -- input_buttons_complete <= '0';
         else
           next_state <= input_buttons;
         end if;
 
       when display_status =>
         -- Wait for Button 1 to be pressed
-        if BtnOne = '1' then
+        if BtnTwo = '1' then
           if display_state = success then
+            sequence_size <= sequence_size + 1; -- Increase sequence length
             next_state <= output_lights;
           else
             next_state <= reset;
@@ -109,9 +108,14 @@ begin
     end case;
   end process;
   
-  HandleButtonState : process(BtnOne, BtnTwo, BtnThree)
+  HandleButtonState : process(BtnOne, BtnTwo, BtnThree, GameClk)
   begin
-    if current_state = input_buttons then
+  
+    if current_state /= input_buttons then
+      input_buttons_complete <= '0'; -- reset input_buttons complete flag
+
+    -- Normal operation
+    else
       -- Handle button input
       if BtnOne = '1' then
         if game_sequence(sequence_iter_buttons) = left_led then
@@ -141,40 +145,45 @@ begin
     end if;
   end process;
   
-  HandleLedState : process(LedClk)
+  HandleLedState : process(LedClk, GameClk)
   begin
-    if rising_edge(LedClk) then
-      if current_state = output_lights then
-        -- Exit case
-        if sequence_iter_lights = sequence_size then
-          output_lights_complete <= '1';
-          sequence_iter_lights <= 0;
+    if rising_edge(LedClk) and current_state = output_lights then
+      -- Exit case
+      if sequence_iter_lights = sequence_size then
+        output_lights_complete <= '1';
+        sequence_iter_lights <= 0;
 
-        -- Normal case
-        else
-          case game_sequence(sequence_iter_lights) is
-            when left_led =>
-              LedOne   <= '1';
-              LedTwo   <= '0';
-              LedThree <= '0';
-            when center_led =>
-              LedOne   <= '0';
-              LedTwo   <= '1';
-              LedThree <= '0';
-            when right_led =>
-              LedOne   <= '0';
-              LedTwo   <= '0';
-              LedThree <= '1';
-            when others =>
-              LedOne   <= '0';
-              LedTwo   <= '0';
-              LedThree <= '0';
-          end case;
+      -- Normal case
+      else
+        case game_sequence(sequence_iter_lights) is
+          when left_led =>
+            LedOne   <= '1';
+            LedTwo   <= '0';
+            LedThree <= '0';
+          when center_led =>
+            LedOne   <= '0';
+            LedTwo   <= '1';
+            LedThree <= '0';
+          when right_led =>
+            LedOne   <= '0';
+            LedTwo   <= '0';
+           LedThree <= '1';
+          when others =>
+            LedOne   <= '0';
+            LedTwo   <= '0';
+            LedThree <= '0';
+        end case;
 
-          sequence_iter_lights <= sequence_iter_lights + 1;
-        end if;
-      end if;    
-    end if;  
+        sequence_iter_lights <= sequence_iter_lights + 1;
+      end if;
+    end if;
+      
+    if current_state /= output_lights then
+      output_lights_complete <= '0';
+      LedOne   <= '0';
+      LedTwo   <= '0';
+      LedThree <= '0';
+    end if;
   end process;
   
   HandleDisplayState : process(GameClk)
@@ -185,8 +194,22 @@ begin
       else
         CharOut <= "100010101001"; -- Print LOSE
       end if;
-    else
-      CharOut <= "111111111111"; -- Display nothing on the screen
+    elsif current_state = reset then
+      if rst = '1' then
+        CharOut <= "011111111111"; -- Y
+      else
+        CharOut <= "010111111111"; -- O
+      end if;
+    elsif current_state = output_lights then
+      if output_lights_complete = '1' then
+        CharOut <= "000111111111"; -- A
+      else
+        CharOut <= "100111111111"; -- L
+      end if;
+    elsif current_state = input_buttons then
+      CharOut <= "001111111111"; -- E
     end if;
+    
+    
   end process;
 end Behavioral;

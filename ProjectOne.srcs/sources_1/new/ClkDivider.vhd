@@ -37,7 +37,10 @@ begin
   process(InputClock)
   begin
     if rising_edge(InputClock) then
+      counter <= counter + 1;
+    
       if counter = ((InputClkFreq / OutputClkFreq) / 2) then
+        counter <= "0000000000000000000000000000";
         ClkOut <= not(ClkOut);
       end if;
     end if;
