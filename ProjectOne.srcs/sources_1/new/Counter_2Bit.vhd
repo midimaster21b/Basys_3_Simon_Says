@@ -46,4 +46,6 @@ begin
       counter_temp <= counter_temp + 1;
     end if;
   end process;
+  
+  count <= counter_temp;
 end Behavioral;
