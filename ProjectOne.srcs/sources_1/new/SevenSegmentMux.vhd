@@ -33,7 +33,6 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity SevenSegmentMux is
 Port (
-  MuxClk: in STD_LOGIC;
   DisplayMuxIn: in STD_LOGIC_VECTOR (1 downto 0); -- Select what character to mux
   CharMuxIn: in STD_LOGIC_VECTOR (11 downto 0);  -- 4 characters (3 bits a piece)
   DisplayMuxOut: out STD_LOGIC_VECTOR (3 downto 0); -- Which seven segment output to use (one hot wire)
@@ -45,7 +44,7 @@ architecture Behavioral of SevenSegmentMux is
 
 begin
 
-  process(MuxClk)
+  process(DisplayMuxIn)
   begin
 
   case DisplayMuxIn is

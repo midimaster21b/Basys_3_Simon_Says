@@ -44,7 +44,7 @@ begin
     if rising_edge(clk) then
       status <= status(3 downto 0) & btn_in;
     
-      if status = "11111" then
+      if status = "01111" then
         btn_out <= '1';
       else
         btn_out <= '0';

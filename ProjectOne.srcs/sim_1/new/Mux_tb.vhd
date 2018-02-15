@@ -31,7 +31,6 @@ architecture Behavioral of Mux_tb is
 
 component SevenSegmentMux
 Port (
-  MuxClk: in STD_LOGIC;
   DisplayMuxIn: in STD_LOGIC_VECTOR (1 downto 0);
   CharMuxIn: in STD_LOGIC_VECTOR (11 downto 0);
   DisplayMuxOut: out STD_LOGIC_VECTOR (3 downto 0);
@@ -62,7 +61,7 @@ end component;
   end monitor;
   
   begin
-   M1: SevenSegmentMux PORT MAP ( sim_clk, mux_selector, char_in, display_out, mux_output );
+   M1: SevenSegmentMux PORT MAP ( mux_selector, char_in, display_out, mux_output );
 
   stim_proc: process
   begin
