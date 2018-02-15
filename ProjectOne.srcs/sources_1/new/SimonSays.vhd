@@ -32,6 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity SimonSays is
+  Port (
+    InputClock : in STD_LOGIC;
+    SevenSegmentCharacter : out STD_LOGIC_VECTOR (6 downto 0);
+    SevenSegmentDisplaySelect : out STD_LOGIC_VECTOR (3 downto 0);
+    rst_switch : in STD_LOGIC
+  );
 end SimonSays;
 
 architecture Behavioral of SimonSays is
@@ -75,7 +81,6 @@ component SimonSaysGameLogic
 end component;
 
 -- General Signals
-signal InputClock : STD_LOGIC;
 signal rst : STD_LOGIC := '0';
 
 -- Inputs
@@ -98,8 +103,8 @@ signal SevenSegmentClock : STD_LOGIC;
 signal SevenSegmentCounterOut : STD_LOGIC_VECTOR (1 downto 0);       -- Counter representation of which seven segment to select
 signal SevenSegmentMuxCharacters : STD_LOGIC_VECTOR (11 downto 0);   -- 4 encoded charaters supplied to mux
 signal SevenSegmentCharacterSelect : STD_LOGIC_VECTOR (2 downto 0);  -- Selected encoded character to output
-signal SevenSegmentDisplaySelect : STD_LOGIC_VECTOR (3 downto 0);    -- One hot wire selecting which seven segment display to output to
-signal SevenSegmentCharacter : STD_LOGIC_VECTOR (6 downto 0);        -- Actual cathode control
+-- signal SevenSegmentDisplaySelect : STD_LOGIC_VECTOR (3 downto 0);    -- One hot wire selecting which seven segment display to output to
+-- signal SevenSegmentCharacter : STD_LOGIC_VECTOR (6 downto 0);        -- Actual cathode control
 
 begin
 
@@ -125,7 +130,7 @@ GAME: SimonSaysGameLogic
 -- Seven Segment Displays
 U1: CLK_DIVIDER_250Hz PORT MAP (InputClock, SevenSegmentClock);
 U2: Counter_2Bit PORT MAP (SevenSegmentClock, SevenSegmentCounterOut);
-U3: SevenSegmentMux PORT MAP (SevenSegmentCounterOut, SevenSegmentMuxCharacters, SevenSegmentCharacterSelect, SevenSegmentDisplaySelect);
+U3: SevenSegmentMux PORT MAP (SevenSegmentCounterOut, SevenSegmentMuxCharacters, SevenSegmentDisplaySelect, SevenSegmentCharacterSelect);
 U4: SevenSegmentDecoder PORT MAP (SevenSegmentCharacterSelect, SevenSegmentCharacter);
 
 end Behavioral;
