@@ -45,8 +45,9 @@ architecture Behavioral of SimonSaysGameLogic is
   type led_sequence is array (5 downto 0) of led_type;
   signal game_sequence : led_sequence := (left_led, center_led, right_led, center_led, left_led, center_led);
 
-  signal sequence_size : Integer := 0;
-  signal sequence_iter : Integer := 0;
+  signal sequence_size : Integer := 3;
+  signal sequence_iter_lights : Integer := 0;
+  signal sequence_iter_buttons : Integer := 0;
 
   -- Signal flags
   signal output_lights_complete, input_buttons_complete : STD_LOGIC := '0';
@@ -67,9 +68,7 @@ begin
       when reset =>
         if BtnOne = '1' then
           -- Reset sequence size and iterator
-          sequence_iter <= 0;
           sequence_size <= 0;
-
           next_state <= output_lights;
         else
           next_state <= reset;
@@ -77,9 +76,8 @@ begin
         
       when output_lights =>
         if output_lights_complete = '1' then
-          sequence_iter <= 0;
           next_state <= input_buttons;
-          output_lights_complete <= '0';
+          -- output_lights_complete <= '0';
         else
           next_state <= output_lights;
         end if;
@@ -87,7 +85,7 @@ begin
       when input_buttons =>
         if input_buttons_complete = '1' then
           next_state <= display_status;
-          input_buttons_complete <= '0';
+          -- input_buttons_complete <= '0';
         else
           next_state <= input_buttons;
         end if;
@@ -116,32 +114,30 @@ begin
     if current_state = input_buttons then
       -- Handle button input
       if BtnOne = '1' then
-        if game_sequence(sequence_iter) = left_led then
-          sequence_iter <= sequence_iter + 1;
+        if game_sequence(sequence_iter_buttons) = left_led then
+          sequence_iter_buttons <= sequence_iter_buttons + 1;
         else
           display_state <= failure;
           input_buttons_complete <= '1';
         end if;
       
       elsif BtnTwo = '1' then
-        if game_sequence(sequence_iter) = center_led then
-          sequence_iter <= sequence_iter + 1;
+        if game_sequence(sequence_iter_buttons) = center_led then
+          sequence_iter_buttons <= sequence_iter_buttons + 1;
         else
           display_state <= failure;
           input_buttons_complete <= '1';
         end if;
 
       elsif BtnThree = '1' then
-        if game_sequence(sequence_iter) = right_led then
-          sequence_iter <= sequence_iter + 1;
+        if game_sequence(sequence_iter_buttons) = right_led then
+          sequence_iter_buttons <= sequence_iter_buttons + 1;
         else
           display_state <= failure;
           input_buttons_complete <= '1';
+          sequence_iter_buttons <= 0;
         end if;
-
       end if;
-      
-      sequence_iter <= sequence_iter + 1;
     end if;
   end process;
   
@@ -150,12 +146,13 @@ begin
     if rising_edge(LedClk) then
       if current_state = output_lights then
         -- Exit case
-        if sequence_iter = sequence_size then
+        if sequence_iter_lights = sequence_size then
           output_lights_complete <= '1';
+          sequence_iter_lights <= 0;
 
         -- Normal case
         else
-          case game_sequence(sequence_iter) is
+          case game_sequence(sequence_iter_lights) is
             when left_led =>
               LedOne   <= '1';
               LedTwo   <= '0';
@@ -174,7 +171,7 @@ begin
               LedThree <= '0';
           end case;
 
-          sequence_iter <= sequence_iter + 1;
+          sequence_iter_lights <= sequence_iter_lights + 1;
         end if;
       end if;    
     end if;  

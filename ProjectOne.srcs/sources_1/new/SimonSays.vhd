@@ -36,7 +36,8 @@ entity SimonSays is
     InputClock : in STD_LOGIC;
     SevenSegmentCharacter : out STD_LOGIC_VECTOR (6 downto 0);
     SevenSegmentDisplaySelect : out STD_LOGIC_VECTOR (3 downto 0);
-    rst_switch : in STD_LOGIC
+    rst_switch : in STD_LOGIC;
+    LedOne, LedTwo, LedThree : out STD_LOGIC
   );
 end SimonSays;
 
@@ -96,7 +97,6 @@ signal ButtonThreeDebounce : STD_LOGIC;
 
 -- Game Logic
 signal LedClock : STD_LOGIC;
-signal LedOne, LedTwo, LedThree : STD_LOGIC;
 
 -- Seven Segment
 signal SevenSegmentClock : STD_LOGIC;

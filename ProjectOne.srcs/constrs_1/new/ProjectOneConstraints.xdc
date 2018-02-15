@@ -47,3 +47,16 @@ set_property IOSTANDARD LVCMOS33 [get_ports {SevenSegmentCharacter[6]}]
 # Output selection
 set_property PACKAGE_PIN R2 [get_ports rst_switch]
 set_property IOSTANDARD LVCMOS33 [get_ports rst_switch]
+
+# Led One
+set_property PACKAGE_PIN U16 [get_ports LedOne]
+set_property IOSTANDARD LVCMOS33 [get_ports LedOne]
+
+# Led Two
+set_property PACKAGE_PIN E19 [get_ports LedTwo]
+set_property IOSTANDARD LVCMOS33 [get_ports LedTwo]
+
+# Led Three
+set_property PACKAGE_PIN U19 [get_ports LedThree]
+set_property IOSTANDARD LVCMOS33 [get_ports LedThree]
+
