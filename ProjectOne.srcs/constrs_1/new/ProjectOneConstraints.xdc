@@ -60,3 +60,14 @@ set_property IOSTANDARD LVCMOS33 [get_ports LedTwo]
 set_property PACKAGE_PIN U19 [get_ports LedThree]
 set_property IOSTANDARD LVCMOS33 [get_ports LedThree]
 
+# Left button
+set_property PACKAGE_PIN W19 [get_ports ButtonOneInput]
+set_property IOSTANDARD LVCMOS33 [get_ports ButtonOneInput]
+
+# Center button
+set_property PACKAGE_PIN U18 [get_ports ButtonTwoInput]
+set_property IOSTANDARD LVCMOS33 [get_ports ButtonTwoInput]
+
+# Right button
+set_property PACKAGE_PIN T17 [get_ports ButtonThreeInput]
+set_property IOSTANDARD LVCMOS33 [get_ports ButtonThreeInput]
