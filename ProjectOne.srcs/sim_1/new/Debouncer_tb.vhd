@@ -106,7 +106,7 @@ architecture Behavioral of Debouncer_tb is
       monitor('0');
     end loop;
 
-    REPORT "Beginning the 4 cycles on, 3 cycles off test" SEVERITY NOTE;
+    REPORT "Beginning the 4 cycles on, 4 cycles off test" SEVERITY NOTE;
     sim_btn_in <= '1';
     for i in 0 to 3 loop
       sim_clk <= '1';
@@ -132,6 +132,33 @@ architecture Behavioral of Debouncer_tb is
       wait for 1 ns;
       monitor('0');
     end loop;
+    
+    REPORT "Beginning the 8 cycles on" SEVERITY NOTE;
+    sim_btn_in <= '1';
+    for i in 0 to 3 loop
+      sim_clk <= '1';
+      wait for 1 ns;
+      sim_clk <= '0';
+      wait for 1 ns;
+      monitor('0');
+    end loop;
+    
+    sim_clk <= '1';
+    wait for 1 ns;
+    sim_clk <= '0';
+    wait for 1 ns;
+    
+    monitor('1'); -- Should be one 
+
+    for i in 0 to 2 loop
+      sim_clk <= '1';
+      wait for 1 ns;
+      sim_clk <= '0';
+      wait for 1 ns;
+      monitor('0');
+    end loop;
+    
+    
 
     REPORT "Debouncer test completed." SEVERITY NOTE;
 

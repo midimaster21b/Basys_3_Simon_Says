@@ -25,7 +25,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity SimonSaysGameLogic is
   Port (
-    signal rst, BtnOne, BtnTwo, BtnThree, GameClk, LedClk : in STD_LOGIC; 
+    signal rst, BtnOne, BtnTwo, BtnThree, BtnFour, GameClk, LedClk, BtnClk : in STD_LOGIC; 
     signal LedOne, LedTwo, LedThree : out STD_LOGIC;
     signal CharOut : out STD_LOGIC_VECTOR (11 downto 0)
   );
@@ -45,12 +45,16 @@ architecture Behavioral of SimonSaysGameLogic is
   type led_sequence is array (5 downto 0) of led_type;
   signal game_sequence : led_sequence := (left_led, center_led, right_led, center_led, left_led, center_led);
 
-  signal sequence_size : Integer := 3;
+  signal sequence_size : Integer := 0;
   signal sequence_iter_lights : Integer := 0;
   signal sequence_iter_buttons : Integer := 0;
 
   -- Signal flags
   signal output_lights_complete, input_buttons_complete : STD_LOGIC := '0';
+
+  -- Input signals
+  signal sequence_length_char, sequence_iter_btn_char : STD_LOGIC_VECTOR (2 downto 0) := "111";
+
 begin
 
   AdvanceState : process(GameClk)
@@ -68,7 +72,7 @@ begin
       when reset =>
         if BtnOne = '1' then
           -- Reset sequence size and iterator
-          sequence_size <= 1;
+          sequence_size <= 5;
           next_state <= output_lights;
         else
           next_state <= reset;
@@ -90,7 +94,7 @@ begin
 
       when display_status =>
         -- Wait for Button 1 to be pressed
-        if BtnTwo = '1' then
+        if BtnFour = '1' then
           if display_state = success then
             sequence_size <= sequence_size + 1; -- Increase sequence length
             next_state <= output_lights;
@@ -108,48 +112,56 @@ begin
     end case;
   end process;
   
-  HandleButtonState : process(BtnOne, BtnTwo, BtnThree, GameClk)
+--   HandleButtonState : process(BtnOne, BtnTwo, BtnThree)
+  HandleButtonState : process(BtnClk, current_state)
   begin
-  
-    if current_state /= input_buttons then
-      input_buttons_complete <= '0'; -- reset input_buttons complete flag
+    if rising_edge(BtnClk) and current_state = input_buttons then
+      -- Exit condition
+      if sequence_iter_buttons >= sequence_size then
+        display_state <= success;
+        input_buttons_complete <= '1';
 
-    -- Normal operation
-    else
+      -- Normal operation
+      else
       -- Handle button input
-      if BtnOne = '1' then
-        if game_sequence(sequence_iter_buttons) = left_led then
-          sequence_iter_buttons <= sequence_iter_buttons + 1;
-        else
-          display_state <= failure;
-          input_buttons_complete <= '1';
-        end if;
-      
-      elsif BtnTwo = '1' then
-        if game_sequence(sequence_iter_buttons) = center_led then
-          sequence_iter_buttons <= sequence_iter_buttons + 1;
-        else
-          display_state <= failure;
-          input_buttons_complete <= '1';
-        end if;
+        if BtnOne = '1' then
+          if game_sequence(sequence_iter_buttons) = left_led then
+            sequence_iter_buttons <= sequence_iter_buttons + 1;
+          else
+            display_state <= failure;
+            input_buttons_complete <= '1';
+          end if;
 
-      elsif BtnThree = '1' then
-        if game_sequence(sequence_iter_buttons) = right_led then
-          sequence_iter_buttons <= sequence_iter_buttons + 1;
-        else
-          display_state <= failure;
-          input_buttons_complete <= '1';
-          sequence_iter_buttons <= 0;
+        elsif BtnTwo = '1' then
+          if game_sequence(sequence_iter_buttons) = center_led then
+            sequence_iter_buttons <= sequence_iter_buttons + 1;
+          else
+            display_state <= failure;
+            input_buttons_complete <= '1';
+          end if;
+    
+        elsif BtnThree = '1' then
+          if game_sequence(sequence_iter_buttons) = right_led then
+            sequence_iter_buttons <= sequence_iter_buttons + 1;
+          else
+            display_state <= failure;
+            input_buttons_complete <= '1';
+          end if;
         end if;
       end if;
     end if;
+      
+    if current_state /= input_buttons then
+      input_buttons_complete <= '0'; -- reset input_buttons complete flag
+      sequence_iter_buttons <= 0;    -- reset sequence iterator
+    end if;
   end process;
   
-  HandleLedState : process(LedClk, GameClk)
+  HandleLedState : process(LedClk, current_state)
   begin
     if rising_edge(LedClk) and current_state = output_lights then
       -- Exit case
-      if sequence_iter_lights = sequence_size then
+      if sequence_iter_lights >= sequence_size then
         output_lights_complete <= '1';
         sequence_iter_lights <= 0;
 
@@ -207,7 +219,24 @@ begin
         CharOut <= "100111111111"; -- L
       end if;
     elsif current_state = input_buttons then
-      CharOut <= "001111111111"; -- E
+--      sequence_length_char, sequence_iter_btn_char
+      case sequence_iter_buttons is
+        when 0 =>
+          CharOut <= "001010111111"; -- EO
+          sequence_length_char <= "010"; -- 0
+        when 1 =>
+          CharOut <= "001100111111"; -- EL
+        when 2 =>
+          CharOut <= "001110111111"; -- E!
+        when 3 =>
+          CharOut <= "001001111111"; -- EE
+        when 4 =>
+          CharOut <= "001000111111"; -- EA
+        when 5 =>
+          CharOut <= "001101111111"; -- ES
+        when others =>
+          CharOut <= "001111111111"; -- E
+      end case;
     end if;
     
     

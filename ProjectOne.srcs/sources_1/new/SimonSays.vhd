@@ -38,7 +38,7 @@ entity SimonSays is
     SevenSegmentDisplaySelect : out STD_LOGIC_VECTOR (3 downto 0);
     rst_switch : in STD_LOGIC;
     LedOne, LedTwo, LedThree : out STD_LOGIC;
-    ButtonOneInput, ButtonTwoInput, ButtonThreeInput : in STD_LOGIC
+    ButtonOneInput, ButtonTwoInput, ButtonThreeInput, ButtonFourInput : in STD_LOGIC
   );
 end SimonSays;
 
@@ -76,7 +76,7 @@ end component;
 
 component SimonSaysGameLogic
   Port (
-    signal rst, BtnOne, BtnTwo, BtnThree, GameClk, LedClk : in STD_LOGIC; 
+    signal rst, BtnOne, BtnTwo, BtnThree, BtnFour, GameClk, LedClk, BtnClk : in STD_LOGIC; 
     signal LedOne, LedTwo, LedThree : out STD_LOGIC;
     signal CharOut : out STD_LOGIC_VECTOR (11 downto 0)
   );
@@ -91,6 +91,7 @@ signal DebounceClock : STD_LOGIC;
 signal ButtonOneDebounce : STD_LOGIC;
 signal ButtonTwoDebounce : STD_LOGIC;
 signal ButtonThreeDebounce : STD_LOGIC;
+signal ButtonFourDebounce : STD_LOGIC;
 
 -- Game Logic
 signal LedClock : STD_LOGIC;
@@ -113,6 +114,7 @@ DebounceClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 20)
 BTN1: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonOneInput, btn_out => ButtonOneDebounce);
 BTN2: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonTwoInput, btn_out => ButtonTwoDebounce);
 BTN3: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonThreeInput, btn_out => ButtonThreeDebounce);
+BTN4: Debouncer PORT MAP (clk => DebounceClock, btn_in => ButtonFourInput, btn_out => ButtonFourDebounce);
 
 -- Game Logic...
 LedClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 1)
@@ -120,7 +122,7 @@ LedClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 1)
 
 GAME: SimonSaysGameLogic
   PORT MAP (
-    rst => rst_switch, BtnOne => ButtonOneDebounce, BtnTwo => ButtonTwoDebounce, BtnThree => ButtonThreeDebounce, GameClk => InputClock, LedClk => LedClock, 
+    rst => rst_switch, BtnOne => ButtonOneDebounce, BtnTwo => ButtonTwoDebounce, BtnThree => ButtonThreeDebounce, BtnFour => ButtonFourDebounce, GameClk => InputClock, LedClk => LedClock, BtnClk => DebounceClock, 
     LedOne => LedOne, LedTwo => LedTwo, LedThree => LedThree,
     CharOut => SevenSegmentMuxCharacters
   );
