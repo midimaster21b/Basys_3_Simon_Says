@@ -61,6 +61,11 @@ Port (
 );
 end component;
 
+component ClkDivider
+  Generic ( OutputClkFreq : Integer := 1; InputClkFreq : Integer := 100000000 );
+  Port (signal InputClock : in STD_LOGIC; signal OutputClock : out STD_LOGIC := '0' );
+end component;
+
 -- General Signals
 signal InputClock : STD_LOGIC;
 
@@ -86,9 +91,9 @@ signal SevenSegmentCharacter : STD_LOGIC_VECTOR (6 downto 0);        -- Actual c
 begin
 
 -- Inputs
+DebounceClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 20)
+                               PORT MAP (InputClock, DebounceClock);
 
--- TODO: Debouncer clock divider...
--- DebounceClkDivider(InputClock, DebounceClock);
 BTN1: Debouncer PORT MAP (DebounceClock, ButtonOneInput, ButtonOneDebounce);
 BTN2: Debouncer PORT MAP (DebounceClock, ButtonTwoInput, ButtonTwoDebounce);
 BTN3: Debouncer PORT MAP (DebounceClock, ButtonThreeInput, ButtonThreeDebounce);
