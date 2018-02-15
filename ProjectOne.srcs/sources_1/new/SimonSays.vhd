@@ -93,10 +93,11 @@ begin
 -- Inputs
 DebounceClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 20)
                                PORT MAP (InputClock, DebounceClock);
-
 BTN1: Debouncer PORT MAP (DebounceClock, ButtonOneInput, ButtonOneDebounce);
 BTN2: Debouncer PORT MAP (DebounceClock, ButtonTwoInput, ButtonTwoDebounce);
 BTN3: Debouncer PORT MAP (DebounceClock, ButtonThreeInput, ButtonThreeDebounce);
+
+-- Game Logic...
 
 -- Seven Segment Displays
 U1: CLK_DIVIDER_250Hz PORT MAP (InputClock, SevenSegmentClock);
