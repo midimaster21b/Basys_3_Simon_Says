@@ -54,7 +54,6 @@ end component;
 
 component SevenSegmentMux
 Port (
-  MuxClk: in STD_LOGIC;
   DisplayMuxIn: in STD_LOGIC_VECTOR (1 downto 0); -- Select what character to mux
   CharMuxIn: in STD_LOGIC_VECTOR (11 downto 0);  -- 4 characters (3 bits a piece)
   DisplayMuxOut: out STD_LOGIC_VECTOR (3 downto 0); -- Which seven segment output to use (one hot wire)
@@ -66,6 +65,8 @@ end component;
 signal InputClock : STD_LOGIC;
 
 -- Inputs
+signal DebounceClock : STD_LOGIC;
+
 signal ButtonOneInput : STD_LOGIC;
 signal ButtonTwoInput : STD_LOGIC;
 signal ButtonThreeInput : STD_LOGIC;
@@ -75,22 +76,27 @@ signal ButtonTwoDebounce : STD_LOGIC;
 signal ButtonThreeDebounce : STD_LOGIC;
 
 -- Seven Segment
-
 signal SevenSegmentClock : STD_LOGIC;
-signal SevenSegmentCounterOut : STD_LOGIC_VECTOR (1 downto 0);
-signal SevenSegmentMuxCharacters : STD_LOGIC_VECTOR (11 downto 0);
+signal SevenSegmentCounterOut : STD_LOGIC_VECTOR (1 downto 0);       -- Counter representation of which seven segment to select
+signal SevenSegmentMuxCharacters : STD_LOGIC_VECTOR (11 downto 0);   -- 4 encoded charaters supplied to mux
+signal SevenSegmentCharacterSelect : STD_LOGIC_VECTOR (2 downto 0);  -- Selected encoded character to output
+signal SevenSegmentDisplaySelect : STD_LOGIC_VECTOR (3 downto 0);    -- One hot wire selecting which seven segment display to output to
+signal SevenSegmentCharacter : STD_LOGIC_VECTOR (6 downto 0);        -- Actual cathode control
 
 begin
 
--- Debouncer
-BTN1: Debouncer PORT MAP (
+-- Inputs
 
+-- TODO: Debouncer clock divider...
+-- DebounceClkDivider(InputClock, DebounceClock);
+BTN1: Debouncer PORT MAP (DebounceClock, ButtonOneInput, ButtonOneDebounce);
+BTN2: Debouncer PORT MAP (DebounceClock, ButtonTwoInput, ButtonTwoDebounce);
+BTN3: Debouncer PORT MAP (DebounceClock, ButtonThreeInput, ButtonThreeDebounce);
 
 -- Seven Segment Displays
 U1: CLK_DIVIDER_250Hz PORT MAP (InputClock, SevenSegmentClock);
 U2: Counter_2Bit PORT MAP (SevenSegmentClock, SevenSegmentCounterOut);
-U3: 
-
-
+U3: SevenSegmentMux PORT MAP (SevenSegmentCounterOut, SevenSegmentMuxCharacters, SevenSegmentCharacterSelect, SevenSegmentDisplaySelect);
+U4: SevenSegmentDecoder PORT MAP (SevenSegmentCharacterSelect, SevenSegmentCharacter);
 
 end Behavioral;
