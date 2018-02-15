@@ -168,6 +168,10 @@ begin
       display_status_complete <= '0';
     end if;
     
+    if current_state = reset then
+      sequence_size <= sequence_size_base; -- Enables switch reset to function as expected.
+    end if;
+    
   end process;
   
   HandleLedState : process(LedClk, current_state)
