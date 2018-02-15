@@ -33,9 +33,14 @@ end SimonSaysGameLogic;
 
 architecture Behavioral of SimonSaysGameLogic is
 
+  -- State definitions
   type state_type is (reset, output_lights, input_buttons, display_status);
   signal current_state, next_state : state_type;
 
+  type display_type is (success, failure);
+  signal display_state : display_type := success;
+
+  -- Led and sequence definitions
   type led_type is (left_led, center_led, right_led);
   type led_sequence is array (5 downto 0) of led_type;
   signal game_sequence : led_sequence := (left_led, center_led, right_led, center_led, left_led, center_led);
@@ -44,7 +49,7 @@ architecture Behavioral of SimonSaysGameLogic is
   signal sequence_iter : Integer := 0;
 
   -- Signal flags
-  signal output_lights_complete, input_buttons_complete, display_status_complete : STD_LOGIC := '0';
+  signal output_lights_complete, input_buttons_complete : STD_LOGIC := '0';
 begin
 
   AdvanceState : process(GameClk)
@@ -61,6 +66,10 @@ begin
     case current_state is
       when reset =>
         if BtnOne = '1' then
+          -- Reset sequence size and iterator
+          sequence_iter <= 0;
+          sequence_size <= 0;
+
           next_state <= output_lights;
         else
           next_state <= reset;
@@ -68,17 +77,30 @@ begin
         
       when output_lights =>
         if output_lights_complete = '1' then
+          sequence_iter <= 0;
           next_state <= input_buttons;
+          output_lights_complete <= '0';
         else
           next_state <= output_lights;
         end if;
         
       when input_buttons =>
-        next_state <= reset;
-        
+        if input_buttons_complete = '1' then
+          next_state <= display_status;
+          input_buttons_complete <= '0';
+        else
+          next_state <= input_buttons;
+        end if;
+
       when display_status =>
+        -- Wait for Button 1 to be pressed
         if BtnOne = '1' then
-          next_state <= reset;
+          if display_state = success then
+            next_state <= output_lights;
+          else
+            next_state <= reset;
+          end if;
+
         else
           next_state <= display_status;
         end if;
@@ -94,13 +116,32 @@ begin
     if current_state = input_buttons then
       -- Handle button input
       if BtnOne = '1' then
-        
-        
+        if game_sequence(sequence_iter) = left_led then
+          sequence_iter <= sequence_iter + 1;
+        else
+          display_state <= failure;
+          input_buttons_complete <= '1';
+        end if;
+      
       elsif BtnTwo = '1' then
-        
+        if game_sequence(sequence_iter) = center_led then
+          sequence_iter <= sequence_iter + 1;
+        else
+          display_state <= failure;
+          input_buttons_complete <= '1';
+        end if;
+
       elsif BtnThree = '1' then
-        
+        if game_sequence(sequence_iter) = right_led then
+          sequence_iter <= sequence_iter + 1;
+        else
+          display_state <= failure;
+          input_buttons_complete <= '1';
+        end if;
+
       end if;
+      
+      sequence_iter <= sequence_iter + 1;
     end if;
   end process;
   
@@ -137,5 +178,18 @@ begin
         end if;
       end if;    
     end if;  
+  end process;
+  
+  HandleDisplayState : process(GameClk)
+  begin
+    if current_state = display_status then
+      if display_state = success then
+        CharOut <= "011000011110"; -- Print YAY!
+      else
+        CharOut <= "100010101001"; -- Print LOSE
+      end if;
+    else
+      CharOut <= "111111111111"; -- Display nothing on the screen
+    end if;
   end process;
 end Behavioral;

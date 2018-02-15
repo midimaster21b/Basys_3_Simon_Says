@@ -66,8 +66,17 @@ component ClkDivider
   Port (signal InputClock : in STD_LOGIC; signal OutputClock : out STD_LOGIC := '0' );
 end component;
 
+component SimonSaysGameLogic
+  Port (
+    signal rst, BtnOne, BtnTwo, BtnThree, GameClk, LedClk : in STD_LOGIC; 
+    signal LedOne, LedTwo, LedThree : out STD_LOGIC;
+    signal CharOut : out STD_LOGIC_VECTOR (11 downto 0)
+  );
+end component;
+
 -- General Signals
 signal InputClock : STD_LOGIC;
+signal rst : STD_LOGIC := '0';
 
 -- Inputs
 signal DebounceClock : STD_LOGIC;
@@ -79,6 +88,10 @@ signal ButtonThreeInput : STD_LOGIC;
 signal ButtonOneDebounce : STD_LOGIC;
 signal ButtonTwoDebounce : STD_LOGIC;
 signal ButtonThreeDebounce : STD_LOGIC;
+
+-- Game Logic
+signal LedClock : STD_LOGIC;
+signal LedOne, LedTwo, LedThree : STD_LOGIC;
 
 -- Seven Segment
 signal SevenSegmentClock : STD_LOGIC;
@@ -98,6 +111,16 @@ BTN2: Debouncer PORT MAP (DebounceClock, ButtonTwoInput, ButtonTwoDebounce);
 BTN3: Debouncer PORT MAP (DebounceClock, ButtonThreeInput, ButtonThreeDebounce);
 
 -- Game Logic...
+LedClkDivider: ClkDivider GENERIC MAP (OutputClkFreq => 1)
+                             PORT MAP (InputClock, LedClock);
+
+GAME: SimonSaysGameLogic
+  PORT MAP (
+    rst, ButtonOneDebounce, ButtonTwoDebounce, ButtonThreeDebounce, InputClock, LedClock, 
+    LedOne, LedTwo, LedThree,
+    SevenSegmentMuxCharacters
+  );
+
 
 -- Seven Segment Displays
 U1: CLK_DIVIDER_250Hz PORT MAP (InputClock, SevenSegmentClock);
