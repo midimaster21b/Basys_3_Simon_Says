@@ -220,38 +220,11 @@ begin
         CharOut <= "100010101001"; -- Print LOSE
       end if;
     elsif current_state = reset then
-      if rst = '1' then
-        CharOut <= "011111111111"; -- Y
-      else
-        CharOut <= "010111111111"; -- O
-      end if;
+      CharOut <= "010111111111"; -- O
     elsif current_state = output_lights then
-      if output_lights_complete = '1' then
-        CharOut <= "000111111111"; -- A
-      else
-        CharOut <= "100111111111"; -- L
-      end if;
+      CharOut <= "010010111111"; -- OO
     elsif current_state = input_buttons then
---      sequence_length_char, sequence_iter_btn_char
-      case sequence_size is
-        when 0 =>
-          CharOut <= "001010111111"; -- EO
-          sequence_length_char <= "010"; -- 0
-        when 1 =>
-          CharOut <= "001100111111"; -- EL
-        when 2 =>
-          CharOut <= "001110111111"; -- E!
-        when 3 =>
-          CharOut <= "001001111111"; -- EE
-        when 4 =>
-          CharOut <= "001000111111"; -- EA
-        when 5 =>
-          CharOut <= "001101111111"; -- ES
-        when others =>
-          CharOut <= "001111111111"; -- E
-      end case;
+      CharOut <= "010010010111"; -- OOO
     end if;
-    
-    
   end process;
 end Behavioral;
