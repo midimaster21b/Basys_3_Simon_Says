@@ -83,7 +83,7 @@ end component;
     wait for 1 ns;
     sim_clk <= '0';
     wait for 1 ns;
-    monitor("00");
+    monitor("11");
 
     REPORT "Expecting 0 at the output" SEVERITY NOTE;
     sim_clk <= '1';
